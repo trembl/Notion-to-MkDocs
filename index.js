@@ -95,12 +95,15 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
         break
       }
       case 'image': {
+        /*
+        // updated https://github.com/souvikinator/notion-to-md/commit/5e22fcb485eabedeaa8c6075954789da61ee50d5
         const caption = block[block.type].caption[0]
         console.log(caption);
         console.log(caption.plain_text);
         output += n2m.blockToMarkdown(block) + "\n"
         if (caption.plain_text) output += `<figcaption>${caption.plain_text}</figcaption>`
         break
+        */
       }
       default: {
         output += n2m.blockToMarkdown(block) + "\n"
@@ -110,7 +113,7 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
 
   });
 
-  fs.writeFile("test.md", output, (err) => {
+  fs.writeFile("dist/test.md", output, (err) => {
     if (err) console.log(err)
   });
 
