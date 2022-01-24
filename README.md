@@ -24,24 +24,24 @@ Admonitions are mapped from Notion's _callout_, the emoji in the callout defines
 
 #### Admonition Types
 
-‼️ = attention
-⚠️ = caution, warning
-🔥 = danger
-❌ = error
-💡 = hint, tip
-ℹ️ = important
+‼️ = attention  
+⚠️ = caution, warning  
+🔥 = danger  
+❌ = error  
+💡 = hint, tip  
+ℹ️ = important  
 
 #### Admonition Titles
 
 If the first line is enclosed in quotes, it will become the title of the admonition:
 Example: `“This is very Important”`
 
-![docs/images/admonition_danger.jpg]
+![admonition_danger](docs/images/admonition_danger.jpg)
 
 
 ## To Do
 
-[ ] Tables
-[ ] Child Pages
-[ ] MkDocs File Names & Structure
-[ ] Compress/Resize JPEGs
+- [ ] Tables
+- [ ] Child Pages
+- [ ] MkDocs File Names & Structure
+- [ ] Compress/Resize JPEGs
