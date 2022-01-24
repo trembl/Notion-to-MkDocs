@@ -1,12 +1,12 @@
-# Notion-to-MkDocs
+# Notion to MkDocs
 Export Notion Data, format for MkDocs
 
-Build upon: https://www.notion.so/my-integrations
+Build upon: [Notion to Markdown](https://github.com/souvikinator/notion-to-md)
 
 
 ## Get Notion Key
 
-[Create a Notion Integration and get your Secret Key.](https://github.com/souvikinator/notion-to-md)
+[Create a Notion Integration and get your Secret Key.](https://www.notion.so/my-integrations)
 
 ## Usage
 
