@@ -1,11 +1,11 @@
 {
-  "name": "notion-example",
+  "name": "notion-to-mkdocs",
   "type": "module",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "dependencies": {
     "@notionhq/client": "^0.1.9",
-    "notion-to-md": "^2.1.0"
+    "notion-to-md": "github:souvikinator/notion-to-md"
   }
 }
