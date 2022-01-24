@@ -55,7 +55,6 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
 
   var output = ""
   response.results.forEach(function(block) {
-    console.log(block);
 
     switch (block.type) {
       case 'callout': {
@@ -80,7 +79,6 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
         let f = s[0]
         s.shift()
         let body = s.join('\n')
-        console.log("yyyyy " + f);
         if (f.startsWith('“') && f.endsWith('”')) {
           title = f.replaceAll('“', '')
           title = title.replaceAll('”', '')
@@ -94,6 +92,14 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
       case 'table': {
         //console.log(block[block.type])
         //table rows are children
+        break
+      }
+      case 'image': {
+        const caption = block[block.type].caption[0]
+        console.log(caption);
+        console.log(caption.plain_text);
+        output += n2m.blockToMarkdown(block) + "\n"
+        if (caption.plain_text) output += `<figcaption>${caption.plain_text}</figcaption>`
         break
       }
       default: {
