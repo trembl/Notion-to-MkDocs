@@ -47,14 +47,16 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
 
 
 
-(async () => {
+async function getData(id, level) {
   const response = await notion.blocks.children.list({
-    block_id: pageId,
+    block_id: id,
     page_size: 100,
   });
 
   var output = ""
   response.results.forEach(function(block) {
+
+    console.log(level, block.type);
 
     switch (block.type) {
       case 'callout': {
@@ -69,7 +71,7 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
             case '❌': admonition = 'error'; break;
             case '💡': admonition = 'hint'; break;
             case 'ℹ️': admonition = 'important'; break;
-            case '💡': admonition = 'tip'; break;
+            case '🎉': admonition = 'tip'; break;
             case '⚠️': admonition = 'warning'; break;
           }
         }
@@ -87,6 +89,19 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
         break
       }
       case 'child_page': {
+        if (block.has_children) {
+          getData(block.id, level+1);
+          /*
+          (async () => {
+            console.log(block.id);
+            const response2 = await notion.blocks.children.list({
+              block_id: block.id,
+              page_size: 100,
+            });
+            console.log(response2);
+          })()
+          */
+        }
         break
       }
       case 'table': {
@@ -104,6 +119,7 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
         if (caption.plain_text) output += `<figcaption>${caption.plain_text}</figcaption>`
         break
         */
+        break
       }
       default: {
         output += n2m.blockToMarkdown(block) + "\n"
@@ -117,6 +133,8 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
     if (err) console.log(err)
   });
 
-  console.log(output);
+  // console.log(output);
 
-})();
+}
+
+getData(pageId, 1);
