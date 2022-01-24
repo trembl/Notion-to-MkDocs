@@ -10,7 +10,7 @@ Build upon: https://www.notion.so/my-integrations
 ## Usage
 
 ```zsh
-npm install`
+npm install
 export NOTION_KEY="<your secret key>"
 export PAGE_ID="<your page id>"
 node index.js
