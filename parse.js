@@ -56,13 +56,21 @@ export function parseData(response, output_path) {
           caption = caption_long.join(" ")
         }
 
-        let imageObject = url.parse(block.image.file.url)
-        let imageName = imageObject.pathname.split('/')[3]
+        let imageUrl = ""
+        if (block.image.type === 'file') {
+          imageUrl = block.image.file.url
+        } else if (block.image.type === 'external') {
+          imageUrl = block.image.external.url
+        }
+
+        let o = url.parse(imageUrl)
+        let imageName = o.pathname.split('/').pop() // get last
+
         let originalImagePath = path.join(...output_path, "original_"+imageName)
         let resizedImagePath = path.join(...output_path, imageName)
 
         download.image({
-          url: block.image.file.url,
+          url: imageUrl,
           dest: originalImagePath
         })
         .then(({ filename }) => {
