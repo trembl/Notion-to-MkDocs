@@ -3,7 +3,8 @@ import { NotionToMarkdown } from "notion-to-md";
 import fs from 'fs'
 import path from 'path'
 import slugify from 'slugify'
-import { parseData } from './parse.js';
+import { parseData } from './parse.js'
+
 
 
 const notion_key = process.env.NOTION_KEY
@@ -61,12 +62,15 @@ function exportFiles(response, dirName, level=1) {
   dirName = slugify(dirName, {lower: true})
   output_path = output_path.slice(0, level+1)
   output_path[level] = dirName
+
   let p = path.join(...output_path)
   if (!fs.existsSync(p)) fs.mkdirSync(p)
-  let md = parseData(response)
+
+  let md = parseData(response, output_path)
   let filePath = path.join(...output_path, 'index.md')
   console.log("exportFiles", filePath);
   fs.writeFile(filePath, md, err => {})
+
   response.results.forEach(block => {
     if (block.has_children && block.child_page) {
       let t = block.child_page.title
