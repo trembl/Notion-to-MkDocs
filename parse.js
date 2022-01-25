@@ -5,6 +5,7 @@ import path from 'path'
 import url from 'url'
 import slugify from 'slugify'
 import download from "image-downloader"
+import sharp from "sharp"
 
 const notion_key = process.env.NOTION_KEY
 const notion = new Client({ auth: notion_key });
@@ -48,16 +49,37 @@ export function parseData(response, output_path) {
       }
 
       case 'image': {
-        console.log(n2m.blockToMarkdown(block.image));
 
-        let imageUrl = url.parse(block.image.file.url)
-        let imageName = imageUrl.pathname.split('/')[3]
-        let imagePath = path.join(...output_path, imageName)
-        downloadImage(block.image.file.url, imagePath)
+        let caption = "image"
+        if (block.image.caption) {
+          let caption_long = block.image.caption.map(c => c.plain_text)
+          caption = caption_long.join(" ")
+        }
+
+        let imageObject = url.parse(block.image.file.url)
+        let imageName = imageObject.pathname.split('/')[3]
+        let originalImagePath = path.join(...output_path, "original_"+imageName)
+        let resizedImagePath = path.join(...output_path, imageName)
+
+        download.image({
+          url: block.image.file.url,
+          dest: originalImagePath
+        })
+        .then(({ filename }) => {
+          sharp(filename)
+            .resize({ width: 1024 })
+            .jpeg({ quality: 75 })
+            .toFile(resizedImagePath)
+            .then(info => {
+              console.log("Image resized", info.size)
+              fs.unlink(originalImagePath, err => {})
+            })
+            .catch(err => console.error(err))
+        })
+        .catch(err => console.error(err))
 
         //let image = n2m.blockToMarkdown(block)
-        let image = `![](${imageName})`
-        console.log(image);
+        let image = `![${caption}](${imageName})`
         output += image + "\n"
 
         /*
