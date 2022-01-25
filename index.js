@@ -1,6 +1,8 @@
 import { Client } from "@notionhq/client"
 import { NotionToMarkdown } from "notion-to-md";
 import fs from 'fs'
+import path from 'path'
+import slugify from 'slugify'
 
 const notion_key = process.env.NOTION_KEY
 const pageId = process.env.PAGE_ID
@@ -17,7 +19,7 @@ if (!pageId) {
 }
 
 
-
+//console.log(path.parse('/home/user/dir/file.txt'));
 /*
 // passing notion client to the option
 const n2m = new NotionToMarkdown({ notionClient: notion });
@@ -45,9 +47,18 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
 })();
 */
 
+// Create path, content object,
+var pages = []
+var promises = []
 
 
-async function getData(id, level) {
+async function getData(id, level, title) {
+  console.log("getData", id, level, title)
+
+  title = title.map(t => slugify(t, {lower: true}))
+  //title.push('index.md')
+  const slug = path.join(...title)
+
   const response = await notion.blocks.children.list({
     block_id: id,
     page_size: 100,
@@ -56,7 +67,8 @@ async function getData(id, level) {
   var output = ""
   response.results.forEach(function(block) {
 
-    console.log(level, block.type);
+    //console.log("level: " + level, block.type);
+    // console.log(block);
 
     switch (block.type) {
       case 'callout': {
@@ -90,17 +102,21 @@ async function getData(id, level) {
       }
       case 'child_page': {
         if (block.has_children) {
-          getData(block.id, level+1);
+          console.log("child_page", block.id);
           /*
-          (async () => {
-            console.log(block.id);
-            const response2 = await notion.blocks.children.list({
-              block_id: block.id,
-              page_size: 100,
-            });
-            console.log(response2);
-          })()
+          // create folder with block.child_page.title
+          fs.mkdir(path.join(__dirname, block.child_page.title), (err) => {
+            if (err) return console.error(err);
+            console.log('Directory created successfully!');
+          });
           */
+
+          title[level+1] = block.child_page.title
+          getData(block.id, level+1, title).then(r => {
+            console.log(r);
+          })
+
+
         }
         break
       }
@@ -129,12 +145,28 @@ async function getData(id, level) {
 
   });
 
+  /*
   fs.writeFile("dist/test.md", output, (err) => {
     if (err) console.log(err)
+    console.log('FIle created successfully!');
+
   });
-
+  */
   // console.log(output);
-
+  pages.push(
+    {
+      id: id,
+      slug: slug,
+    //  content: output
+    }
+  )
+  console.log("Done, Level " + level);
+  return pages
 }
 
-getData(pageId, 1);
+
+
+getData(pageId, 0, ['FabAcademy 2022']).then((value) => {
+    console.log(value);
+    console.log("Done");
+  })
