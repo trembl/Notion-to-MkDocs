@@ -8,6 +8,7 @@
     "@notionhq/client": "^0.1.9",
     "image-downloader": "^4.0.3",
     "notion-to-md": "github:souvikinator/notion-to-md#v2.1.0",
+    "sharp": "^0.29.3",
     "slugify": "^1.6.5"
   }
 }
