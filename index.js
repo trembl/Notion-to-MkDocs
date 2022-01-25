@@ -54,6 +54,7 @@ var promises = []
 
 async function getData(id, level, title) {
   console.log("getData", id, level, title)
+  var child_ids = []
 
   title = title.map(t => slugify(t, {lower: true}))
   //title.push('index.md')
@@ -110,11 +111,14 @@ async function getData(id, level, title) {
             console.log('Directory created successfully!');
           });
           */
+          child_ids.push(block.id)
+          //title[level+1] = block.child_page.title
+          //promises.push(getData(block.id, level+1, title))
 
-          title[level+1] = block.child_page.title
-          getData(block.id, level+1, title).then(r => {
+          /*.then(r => {
             console.log(r);
           })
+          */
 
 
         }
@@ -160,13 +164,21 @@ async function getData(id, level, title) {
     //  content: output
     }
   )
-  console.log("Done, Level " + level);
-  return pages
+
+  return {
+    pages: pages,
+    child_ids: child_ids
+  }
 }
 
 
+getData(pageId, 0, ['FabAcademy 2022']).then((r) => {
 
-getData(pageId, 0, ['FabAcademy 2022']).then((value) => {
-    console.log(value);
+    r.child_ids.forEach(child_id => {
+      console.log(child_id);
+      getData(child_id, 1, ['FabAcademy 2022']).then((s) => {
+        console.log(s);
+      })
+    });
     console.log("Done");
   })
