@@ -57,6 +57,9 @@ async function get() {
 
 
 var output_path = [dist]
+// Remove and Make Dir
+fs.rmSync(path.join(...output_path), { recursive: true, force: true });
+fs.mkdirSync(path.join(...output_path));
 
 function exportFiles(response, dirName, level=1) {
   dirName = slugify(dirName, {lower: true})
