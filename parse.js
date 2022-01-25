@@ -69,11 +69,35 @@ export function parseData(response, output_path) {
         let originalImagePath = path.join(...output_path, "original_"+imageName)
         let resizedImagePath = path.join(...output_path, imageName)
 
+
+
         download.image({
           url: imageUrl,
           dest: originalImagePath
         })
         .then(({ filename }) => {
+
+          console.log(filename);
+          const image = sharp(filename);
+          image
+            .metadata()
+            .then(function(metadata) {
+              console.log("Original Image width: " + metadata.width)
+              let w = metadata.width > 500 ? 500 : metadata.width
+              return image
+                .resize({ width: w })
+                .jpeg({ quality: 75 })
+                .toFile(resizedImagePath)
+                .then(info => {
+                  console.log("Image resized, new width: " + info.width + ", Size: " + info.size)
+                  fs.unlink(originalImagePath, err => {})
+                })
+                .catch(err => console.error(err))
+
+
+            })
+
+            /*
           sharp(filename)
             .resize({ width: 1024 })
             .jpeg({ quality: 75 })
@@ -83,8 +107,12 @@ export function parseData(response, output_path) {
               fs.unlink(originalImagePath, err => {})
             })
             .catch(err => console.error(err))
+            */
         })
         .catch(err => console.error(err))
+
+
+
 
         //let image = n2m.blockToMarkdown(block)
         let image = `![${caption}](${imageName})`
