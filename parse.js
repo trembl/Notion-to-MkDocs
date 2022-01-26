@@ -7,6 +7,9 @@ import slugify from 'slugify'
 import download from "image-downloader"
 import sharp from "sharp"
 
+const MAX_IMAGE_WIDTH = 1024
+const JPEG_QUALITY = 75
+
 const notion_key = process.env.NOTION_KEY
 const notion = new Client({ auth: notion_key });
 const n2m = new NotionToMarkdown({ notionClient: notion });
@@ -24,14 +27,15 @@ export function parseData(response, output_path) {
         if (icon.type === 'emoji') {
           // https://docutils.sourceforge.io/docs/ref/rst/directives.html#specific-admonitions
           switch (icon.emoji) {
+            case '🗒': admonition = 'note'; break;
+            case '⚠️': admonition = 'warning'; break;
+            case '🔥': admonition = 'danger'; break;
             case '‼️': admonition = 'attention'; break;
             case '⚠️': admonition = 'caution'; break;
-            case '🔥': admonition = 'danger'; break;
             case '❌': admonition = 'error'; break;
             case '💡': admonition = 'hint'; break;
             case 'ℹ️': admonition = 'important'; break;
             case '🎉': admonition = 'tip'; break;
-            case '⚠️': admonition = 'warning'; break;
           }
         }
         let b = n2m.blockToMarkdown(block)
@@ -83,10 +87,10 @@ export function parseData(response, output_path) {
             .metadata()
             .then(function(metadata) {
               console.log("Original Image width: " + metadata.width)
-              let w = metadata.width > 500 ? 500 : metadata.width
+              let w = metadata.width > MAX_IMAGE_WIDTH ? MAX_IMAGE_WIDTH : metadata.width
               return image
                 .resize({ width: w })
-                .jpeg({ quality: 75 })
+                .jpeg({ quality: JPEG_QUALITY })
                 .toFile(resizedImagePath)
                 .then(info => {
                   console.log("Image resized, new width: " + info.width + ", Size: " + info.size)
@@ -116,7 +120,7 @@ export function parseData(response, output_path) {
 
         //let image = n2m.blockToMarkdown(block)
         let image = `![${caption}](${imageName})`
-        output += image + "\n"
+        output += image + "\n\n"
 
         /*
         // updated https://github.com/souvikinator/notion-to-md/commit/5e22fcb485eabedeaa8c6075954789da61ee50d5
@@ -131,7 +135,7 @@ export function parseData(response, output_path) {
       }
 
       default: {
-        output += n2m.blockToMarkdown(block) + "\n"
+        output += n2m.blockToMarkdown(block) + "\n\n"
       }
     }
   });
