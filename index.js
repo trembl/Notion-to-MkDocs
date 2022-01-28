@@ -3,30 +3,30 @@ import { NotionToMarkdown } from "notion-to-md";
 import fs from 'fs'
 import path from 'path'
 import slugify from 'slugify'
+import config from 'config'
 import { parseData } from './parse.js'
 
+// Getting Default Values
+const secret_notion_key = config.get('secret_notion_key')
+const page_id = config.get('page_id')
+const dist = config.get('output_destination')
 
 
-const notion_key = process.env.NOTION_KEY
-const pageId = process.env.PAGE_ID
-const dist = "dist"
-
-const notion = new Client({ auth: notion_key });
-const n2m = new NotionToMarkdown({ notionClient: notion });
-
-if (!notion_key) {
+if (!secret_notion_key) {
   console.log("Please check your Notion Key");
   process.exit(0)
 }
-if (!pageId) {
+if (!page_id) {
   console.log("Please check your Page ID");
   process.exit(0)
 }
 
-
+// Initialising Notion
+const notion = new Client({ auth: secret_notion_key });
+const n2m = new NotionToMarkdown({ notionClient: notion });
 
 async function getData(id, name ='') {
-  console.log("Get Data from:", id, name)
+  console.log("Getting Data from:", id, name)
   const response = await notion.blocks.children.list({
     block_id: id,
     page_size: 100,
@@ -55,35 +55,39 @@ async function get(id, name) {
 }
 
 
-var output_path = [dist]
 // Remove and Make Dir
-fs.rmSync(path.join(...output_path), { recursive: true, force: true });
-fs.mkdirSync(path.join(...output_path));
+fs.rmSync(dist, { recursive: true, force: true });
+fs.mkdirSync(dist);
 
-async function exportFiles(response, dirName, level=1) {
-  dirName = slugify(dirName, {lower: true})
-  output_path = output_path.slice(0, level+1)
-  output_path[level] = dirName
+var output_path = [dist]
+async function exportFiles(response, subdir=false, level=0) {
+
+  // Make Sub-Directories according to Level
+  if (subdir) {
+    output_path = output_path.slice(0, level+1)           // slice path, if sub sub page exists, and sub is next
+    output_path[level] = slugify(subdir, {lower: true})   // add sub directory
+  }
 
   let p = path.join(...output_path)
-  if (!fs.existsSync(p)) fs.mkdirSync(p)
+  if (!fs.existsSync(p)) {
+    console.log(`Creating Directory: ${p}`);
+    fs.mkdirSync(p)
+  }
 
-  let md = await parseData(response, output_path)
-  console.log("exportFiles md", md);
+  let file_content = await parseData(response, output_path)
+  let file_path = path.join(...output_path, 'index.md')
+  fs.writeFileSync(file_path, file_content)
+  console.log(`Writing File: ${file_path}`);
 
-  let filePath = path.join(...output_path, 'index.md')
-  console.log("exportFiles filePath", filePath);
-  fs.writeFile(filePath, md, err => {})
-
-  response.results.forEach(block => {
-    if (block.has_children && block.child_page) {
-      let t = block.child_page.title
-      exportFiles(block.child.response, t, level+1)
+  for (const block of response.results) {
+    if (block.child_page && block.has_children) {
+      // needs await !!!
+      await exportFiles(block.child.response, block.child_page.title, level+1) // increase level
     }
-  })
+  }
 }
 
-get(pageId).then(pages => {
-  var path = "FabAcademy-2022"
-  exportFiles(pages.response, path)
+get(page_id).then(pages => {
+  //console.log(pages.response);
+  exportFiles(pages.response)
 })

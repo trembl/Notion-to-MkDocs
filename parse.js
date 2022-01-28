@@ -1,5 +1,6 @@
 import { Client } from "@notionhq/client"
 import { NotionToMarkdown } from "notion-to-md"
+import config from 'config'
 import fs from 'fs'
 import path from 'path'
 import url from 'url'
@@ -7,15 +8,17 @@ import slugify from 'slugify'
 import download from "image-downloader"
 import sharp from "sharp"
 
-const MAX_IMAGE_WIDTH = 1024
-const JPEG_QUALITY = 75
+// Getting Default Values
+const secret_notion_key = config.get('secret_notion_key')
+const MAX_IMAGE_WIDTH =   config.get('max_image_width')
+const JPEG_QUALITY =      config.get('jpeg_quality')
 
-const notion_key = process.env.NOTION_KEY
-const notion = new Client({ auth: notion_key });
+// Initialising Notion
+const notion = new Client({ auth: secret_notion_key });
 const n2m = new NotionToMarkdown({ notionClient: notion });
 
 export async function parseData(response, output_path) {
-  console.log("parseData output_path", output_path);
+  // console.log("parseData output_path", output_path);
   // console.log("parseData response", response);
 
   var output = ""
@@ -78,12 +81,14 @@ export async function parseData(response, output_path) {
         })
         .then(({ filename }) => {
 
-          console.log(filename);
+
           const image = sharp(filename);
           image
             .metadata()
             .then(function(metadata) {
-              console.log("Original Image width: " + metadata.width)
+              let str = `${metadata.width}, ${filename}`
+              console.log('Image: \x1b[44m\x1b[30m%s\x1b[0m', str)
+
               let w = metadata.width > MAX_IMAGE_WIDTH ? MAX_IMAGE_WIDTH : metadata.width
               return image
                 .resize({ width: w })
@@ -91,13 +96,12 @@ export async function parseData(response, output_path) {
                 .toFile(resizedImagePath)
                 .then(info => {
                   if (metadata.width > MAX_IMAGE_WIDTH) {
-                    console.log("Image saved & resized, new width: " + info.width + ", Size: " + info.size)
+                    let str = `Image saved & resized, new width: ${info.width}, Size: ${info.size}`
+                    console.log('\x1b[44m\x1b[30m%s\x1b[0m', str)
                   } else {
                     let str = `Image saved, not resized, width: ${info.width}, Size: ${info.size}`
-                    console.log('\x1b[45m\x1b[30m%s\x1b[0m', str)  //cyan
-
+                    console.log('\x1b[45m\x1b[30m%s\x1b[0m', str)
                   }
-                  console.log();
                   fs.unlink(originalImagePath, err => {})
                 })
                 .catch(err => console.error(err))
