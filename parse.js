@@ -93,7 +93,12 @@ export function parseData(response, output_path) {
                 .jpeg({ quality: JPEG_QUALITY })
                 .toFile(resizedImagePath)
                 .then(info => {
-                  console.log("Image resized, new width: " + info.width + ", Size: " + info.size)
+                  if (metadata.width > MAX_IMAGE_WIDTH) {
+                    console.log("Image saved & resized, new width: " + info.width + ", Size: " + info.size)
+                  } else {
+                    console.log("Image saved, not resized, width: " + info.width + ", Size: " + info.size)
+                  }
+                  console.log();
                   fs.unlink(originalImagePath, err => {})
                 })
                 .catch(err => console.error(err))

@@ -52,7 +52,9 @@ async function getData(id) {
 
 
 async function get() {
-  return await getData(pageId)
+  let data =  await getData(pageId)
+  console.log("get done");
+  return data
 }
 
 
