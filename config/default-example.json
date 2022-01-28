@@ -1,7 +1,7 @@
 {
-  "secret_notion_key": "1234.."
+  "secret_notion_key": "1234..",
   "page_id": "1234..",
-  "output_destination": "absolute/path/to/output/dir",
+  "output_destination": "dist",
   "jpeg_quality": 75,
   "max_image_width": 1024
 }
