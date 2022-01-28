@@ -14,11 +14,11 @@ const notion_key = process.env.NOTION_KEY
 const notion = new Client({ auth: notion_key });
 const n2m = new NotionToMarkdown({ notionClient: notion });
 
-export function parseData(response, output_path) {
+export async function parseData(response, output_path) {
   console.log("parseData", output_path);
 
   var output = ""
-  response.results.forEach(function(block) {
+  response.results.forEach(async function(block) {
 
     switch (block.type) {
       case 'callout': {
@@ -39,6 +39,8 @@ export function parseData(response, output_path) {
           }
         }
         let b = n2m.blockToMarkdown(block)
+        b = await b
+        console.log(b);
         let title = ''
         let s = b.split('\n')
         let f = s[0]
@@ -49,6 +51,7 @@ export function parseData(response, output_path) {
           title = title.replaceAll('”', '')
         }
         output += `!!! ${admonition} "${title}"\n    ${body}\n`
+        console.log(output);
         break
       }
 
@@ -72,8 +75,6 @@ export function parseData(response, output_path) {
 
         let originalImagePath = path.join(...output_path, "original_"+imageName)
         let resizedImagePath = path.join(...output_path, imageName)
-
-
 
         download.image({
           url: imageUrl,
@@ -102,26 +103,10 @@ export function parseData(response, output_path) {
                   fs.unlink(originalImagePath, err => {})
                 })
                 .catch(err => console.error(err))
-
-
             })
 
-            /*
-          sharp(filename)
-            .resize({ width: 1024 })
-            .jpeg({ quality: 75 })
-            .toFile(resizedImagePath)
-            .then(info => {
-              console.log("Image resized", info.size)
-              fs.unlink(originalImagePath, err => {})
-            })
-            .catch(err => console.error(err))
-            */
         })
         .catch(err => console.error(err))
-
-
-
 
         //let image = n2m.blockToMarkdown(block)
         let image = `![${caption}](${imageName})`
@@ -140,7 +125,8 @@ export function parseData(response, output_path) {
       }
 
       default: {
-        output += n2m.blockToMarkdown(block) + "\n\n"
+        // blockToMarkdown async in 2.2.1 for tables sub-blocks
+        output += await n2m.blockToMarkdown(block) + "\n\n"
       }
     }
   });

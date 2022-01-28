@@ -52,9 +52,7 @@ async function getData(id) {
 
 
 async function get() {
-  let data =  await getData(pageId)
-  console.log("get done");
-  return data
+  return await getData(pageId)
 }
 
 
@@ -72,6 +70,8 @@ function exportFiles(response, dirName, level=1) {
   if (!fs.existsSync(p)) fs.mkdirSync(p)
 
   let md = parseData(response, output_path)
+  console.log(md);
+
   let filePath = path.join(...output_path, 'index.md')
   console.log("exportFiles", filePath);
   fs.writeFile(filePath, md, err => {})
