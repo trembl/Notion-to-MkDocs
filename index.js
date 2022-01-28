@@ -60,7 +60,7 @@ var output_path = [dist]
 fs.rmSync(path.join(...output_path), { recursive: true, force: true });
 fs.mkdirSync(path.join(...output_path));
 
-function exportFiles(response, dirName, level=1) {
+async function exportFiles(response, dirName, level=1) {
   dirName = slugify(dirName, {lower: true})
   output_path = output_path.slice(0, level+1)
   output_path[level] = dirName
@@ -68,11 +68,11 @@ function exportFiles(response, dirName, level=1) {
   let p = path.join(...output_path)
   if (!fs.existsSync(p)) fs.mkdirSync(p)
 
-  let md = parseData(response, output_path)
-  console.log(md);
+  let md = await parseData(response, output_path)
+  console.log("exportFiles md", md);
 
   let filePath = path.join(...output_path, 'index.md')
-  console.log("exportFiles", filePath);
+  console.log("exportFiles filePath", filePath);
   fs.writeFile(filePath, md, err => {})
 
   response.results.forEach(block => {

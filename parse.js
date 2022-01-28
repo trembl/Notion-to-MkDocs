@@ -15,7 +15,8 @@ const notion = new Client({ auth: notion_key });
 const n2m = new NotionToMarkdown({ notionClient: notion });
 
 export async function parseData(response, output_path) {
-  console.log("parseData", output_path);
+  console.log("parseData output_path", output_path);
+  // console.log("parseData response", response);
 
   var output = ""
   for (const block of response.results) {
@@ -38,7 +39,7 @@ export async function parseData(response, output_path) {
             case '🎉': admonition = 'tip'; break;
           }
         }
-        let b = n2m.blockToMarkdown(block)
+        let b = await n2m.blockToMarkdown(block)
         let title = ''
         let s = b.split('\n')
         let f = s[0]
@@ -92,7 +93,9 @@ export async function parseData(response, output_path) {
                   if (metadata.width > MAX_IMAGE_WIDTH) {
                     console.log("Image saved & resized, new width: " + info.width + ", Size: " + info.size)
                   } else {
-                    console.log("Image saved, not resized, width: " + info.width + ", Size: " + info.size)
+                    let str = `Image saved, not resized, width: ${info.width}, Size: ${info.size}`
+                    console.log('\x1b[45m\x1b[30m%s\x1b[0m', str)  //cyan
+
                   }
                   console.log();
                   fs.unlink(originalImagePath, err => {})
