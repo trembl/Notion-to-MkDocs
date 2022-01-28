@@ -80,15 +80,16 @@ export async function parseData(response, output_path) {
           dest: originalImagePath
         })
         .then(({ filename }) => {
-
-
           const image = sharp(filename);
           image
             .metadata()
             .then(function(metadata) {
+              // https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
               let str = `${metadata.width}, ${filename}`
-              console.log('Image: \x1b[44m\x1b[30m%s\x1b[0m', str)
-
+              let green = '\x1b[43m'
+              let white = '\x1b[37m'
+              let reset = '\x1b[0m'
+              console.log('Image: '+green+white+str+reset)
               let w = metadata.width > MAX_IMAGE_WIDTH ? MAX_IMAGE_WIDTH : metadata.width
               return image
                 .resize({ width: w })
@@ -106,7 +107,6 @@ export async function parseData(response, output_path) {
                 })
                 .catch(err => console.error(err))
             })
-
         })
         .catch(err => console.error(err))
 
@@ -129,9 +129,7 @@ export async function parseData(response, output_path) {
       default: {
         output += await n2m.blockToMarkdown(block) + "\n\n" // blockToMarkdown async since 2.2.1 for tables sub-blocks
       }
-
     }
   }
-
   return output
 }
