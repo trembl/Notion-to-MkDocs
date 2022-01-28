@@ -18,9 +18,9 @@ export async function parseData(response, output_path) {
   console.log("parseData", output_path);
 
   var output = ""
-  response.results.forEach(async function(block) {
-
+  for (const block of response.results) {
     switch (block.type) {
+
       case 'callout': {
         let icon = block[block.type].icon
         let admonition = 'note'
@@ -39,8 +39,6 @@ export async function parseData(response, output_path) {
           }
         }
         let b = n2m.blockToMarkdown(block)
-        b = await b
-        console.log(b);
         let title = ''
         let s = b.split('\n')
         let f = s[0]
@@ -51,18 +49,15 @@ export async function parseData(response, output_path) {
           title = title.replaceAll('”', '')
         }
         output += `!!! ${admonition} "${title}"\n    ${body}\n`
-        console.log(output);
         break
       }
 
       case 'image': {
-
         let caption = "image"
         if (block.image.caption) {
           let caption_long = block.image.caption.map(c => c.plain_text)
           caption = caption_long.join(" ")
         }
-
         let imageUrl = ""
         if (block.image.type === 'file') {
           imageUrl = block.image.file.url
@@ -108,10 +103,10 @@ export async function parseData(response, output_path) {
         })
         .catch(err => console.error(err))
 
-        //let image = n2m.blockToMarkdown(block)
         let image = `![${caption}](${imageName})`
         output += image + "\n\n"
 
+        // Extra DIV for Caption
         /*
         // updated https://github.com/souvikinator/notion-to-md/commit/5e22fcb485eabedeaa8c6075954789da61ee50d5
         const caption = block[block.type].caption[0]
@@ -125,19 +120,11 @@ export async function parseData(response, output_path) {
       }
 
       default: {
-        // blockToMarkdown async in 2.2.1 for tables sub-blocks
-        output += await n2m.blockToMarkdown(block) + "\n\n"
+        output += await n2m.blockToMarkdown(block) + "\n\n" // blockToMarkdown async since 2.2.1 for tables sub-blocks
       }
+
     }
-  });
+  }
 
   return output
-}
-
-
-function downloadImage(url, filepath) {
-  return download.image({
-   url,
-   dest: filepath
-  });
 }

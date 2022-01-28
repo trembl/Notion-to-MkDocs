@@ -31,14 +31,6 @@ async function getData(id) {
 
   }
 
-  /*
-  response.results.forEach(async function(block) {
-    var b = await n2m.blockToMarkdown(block)        // await needs sync
-    output += b
-    console.log(output);
-  })
-  */
-
   return output
 }
 

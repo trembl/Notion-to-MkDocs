@@ -25,34 +25,33 @@ if (!pageId) {
 
 
 
-async function getData(id) {
-  console.log("getData", id)
+async function getData(id, name ='') {
+  console.log("Get Data from:", id, name)
   const response = await notion.blocks.children.list({
     block_id: id,
     page_size: 100,
   });
-  let child_ids = []
-  response.results.forEach(function(block) {
-    if (block.has_children) child_ids.push(block.id)
-  })
 
-  const promises = child_ids.map(async id => {
-    return await getData(id)
-  })
-  const children = await Promise.all(promises)
-
-  response.results.forEach(block => {
-    if (block.has_children) {
-      block.child = children.find(c => c.id === block.id)
+  // Recursive Loop to get Child Pages
+  for (const block of response.results) {
+    if (block.child_page && block.has_children) {
+      block.child = await getData(block.id, block.child_page.title)
     }
-  })
+  }
+
+  // More Blocks
+  if (response.has_more) {
+    console.log("More Blocks...")
+    const moreBlocks = await getData(response.next_cursor, "More than 100 Blocks, Fetching...")
+    response.results = response.results.concat(moreBlocks) // // add to results
+  }
 
   return {response, id}
 }
 
 
-async function get() {
-  return await getData(pageId)
+async function get(id, name) {
+  return await getData(id, name)
 }
 
 
@@ -84,6 +83,7 @@ function exportFiles(response, dirName, level=1) {
   })
 }
 
-get().then(pages => {
-  exportFiles(pages.response, "FabAcademy-2022")
+get(pageId).then(pages => {
+  var path = "FabAcademy-2022"
+  exportFiles(pages.response, path)
 })
