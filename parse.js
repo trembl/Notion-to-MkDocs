@@ -27,8 +27,6 @@ export async function parseData(response, output_path) {
 
       case 'callout': {
         let icon = block[block.type].icon
-        let title = ''
-
         let admonition = 'note' // default
         if (icon.type === 'emoji') {
           // https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
@@ -73,12 +71,12 @@ export async function parseData(response, output_path) {
         if (firstLine.includes(' end')) position += ' end'
 
         // Admonition Title
-        if (firstLine.startsWith('“') && firstLine.endsWith('”')) {
-          title = firstLine.replaceAll('“', '')
-          title = title.replaceAll('”', '')
-        }
+        let title = firstLine.match(/“([^']+)”/)[1];
 
-        output += `${type} ${admonition} "${title}"${position}\n    ${body}\n`
+        // Additional Classes
+        // TODO
+
+        output += `${type} ${admonition} "${title}"${position}\n    ${body}\n\n`
         break
       }
 
