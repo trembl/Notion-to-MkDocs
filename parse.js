@@ -61,10 +61,10 @@ export async function parseData(response, output_path) {
 
         // Admonition Type
         let type = '!!!'
-        if (firstLine.slice(0,3) === '???+') {
+        if (firstLine.slice(0,4) === '???+') {
           type = '???+'
         } else if (firstLine.slice(0,3) === '???') {
-          type = '???+'
+          type = '???'
         }
 
         // Inline & End
