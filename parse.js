@@ -125,6 +125,12 @@ export async function parseData(response, output_path) {
         */
         break
       }
+      case 'child_page': {
+        let title = block.child_page.title
+        let link = slugify(title, {lower: true})
+        output += `[${title}](${link})\n\n`
+        break
+      }
 
       default: {
         output += await n2m.blockToMarkdown(block) + "\n\n" // blockToMarkdown async since 2.2.1 for tables sub-blocks
