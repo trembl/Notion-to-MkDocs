@@ -27,32 +27,58 @@ export async function parseData(response, output_path) {
 
       case 'callout': {
         let icon = block[block.type].icon
-        let admonition = 'note'
+        let title = ''
+
+        let admonition = 'note' // default
         if (icon.type === 'emoji') {
-          // https://docutils.sourceforge.io/docs/ref/rst/directives.html#specific-admonitions
+          // https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
           switch (icon.emoji) {
-            case '🗒': admonition = 'note'; break;
-            case '⚠️': admonition = 'warning'; break;
-            case '🔥': admonition = 'danger'; break;
-            case '‼️': admonition = 'attention'; break;
-            case '⚠️': admonition = 'caution'; break;
-            case '❌': admonition = 'error'; break;
-            case '💡': admonition = 'hint'; break;
-            case 'ℹ️': admonition = 'important'; break;
-            case '🎉': admonition = 'tip'; break;
+            case '✏️': admonition = 'note';
+            case '📝': admonition = 'note'; break;
+            case '🗒': admonition = 'abstract'; break;  // summary, tldr
+            case 'ℹ️': admonition = 'info'; break;      // todo
+            case '🔥': admonition = 'tip'; break;       // hint, important
+            case '✅': admonition = 'success'; break;   // check, done
+            case '❓': admonition = 'questions'; break; // help, faq
+            case '⚠️': admonition = 'warning'; break;   // caution, attention
+            case '❌': admonition = 'failure'; break;  // fail, missing
+            case '⚡️': admonition = 'danger'; break;    // error
+            case '🐞': admonition = 'bug'; break;
+            case '📌': admonition = 'example'; break;
+            case '📖': admonition = 'quote'; break;     // cite
           }
         }
         let b = await n2m.blockToMarkdown(block)
-        let title = ''
+
+        // split by newline
         let s = b.split('\n')
-        let f = s[0]
+
+        let firstLine = s[0]
+
+        // callout body
         s.shift()
         let body = s.join('\n')
-        if (f.startsWith('“') && f.endsWith('”')) {
-          title = f.replaceAll('“', '')
+
+        // Admonition Type
+        let type = '!!!'
+        if (firstLine.slice(0,3) === '???+') {
+          type = '???+'
+        } else if (firstLine.slice(0,3) === '???') {
+          type = '???+'
+        }
+
+        // Inline & End
+        let position = ''
+        if (firstLine.includes(' inline')) position += ' inline'
+        if (firstLine.includes(' end')) position += ' end'
+
+        // Admonition Title
+        if (firstLine.startsWith('“') && firstLine.endsWith('”')) {
+          title = firstLine.replaceAll('“', '')
           title = title.replaceAll('”', '')
         }
-        output += `!!! ${admonition} "${title}"\n    ${body}\n`
+
+        output += `${type} ${admonition} "${title}"${position}\n    ${body}\n`
         break
       }
 
